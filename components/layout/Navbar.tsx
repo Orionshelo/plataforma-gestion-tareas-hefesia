@@ -64,7 +64,7 @@ export function Navbar({ profile }: NavbarProps) {
             </button>
           )}
           
-          <span style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }} className="hidden sm:inline">
+          <span style={{ fontSize: 'var(--font-sm)' }} className="hidden sm:inline">
             {profile.full_name || profile.email}
           </span>
           <form action={logout}>
