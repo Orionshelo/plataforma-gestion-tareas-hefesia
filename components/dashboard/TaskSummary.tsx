@@ -5,6 +5,7 @@ import { completeTask } from '@/actions/tasks'
 import { formatDate, isOverdue, isDueSoon } from '@/lib/utils/dates'
 import { TASK_PRIORITY_LABELS } from '@/lib/utils/constants'
 import type { TaskWithProject } from '@/lib/types/database'
+import { CalendarIcon, Check, Trophy } from 'lucide-react'
 
 interface TaskSummaryProps {
   tasks: TaskWithProject[]
@@ -30,8 +31,8 @@ export function TaskSummary({ tasks, title = 'Próximas Tareas' }: TaskSummaryPr
       </div>
 
       {tasks.length === 0 ? (
-        <div className="empty-state" style={{ padding: 'var(--space-xl) 0' }}>
-          <div className="empty-state-icon">🎉</div>
+        <div className="empty-state" style={{ padding: 'var(--space-xl) 0', textAlign: 'center' }}>
+          <div className="empty-state-icon" style={{ display: 'inline-flex', marginBottom: 'var(--space-sm)' }}><Trophy size={48} className="text-secondary" /></div>
           <p className="empty-state-desc">
             No tienes tareas pendientes. ¡Buen trabajo!
           </p>
@@ -54,7 +55,7 @@ export function TaskSummary({ tasks, title = 'Próximas Tareas' }: TaskSummaryPr
                   {loadingId === task.id ? (
                     <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
                   ) : isCompleted ? (
-                    '✓'
+                    <Check size={14} />
                   ) : null}
                 </button>
 
@@ -75,8 +76,9 @@ export function TaskSummary({ tasks, title = 'Próximas Tareas' }: TaskSummaryPr
                     {task.due_date && (
                       <span
                         className={`task-meta-item ${overdue ? 'overdue' : dueSoon ? 'due-soon' : ''}`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                       >
-                        📅 {formatDate(task.due_date)}
+                        <CalendarIcon size={12} /> {formatDate(task.due_date)}
                       </span>
                     )}
                   </div>

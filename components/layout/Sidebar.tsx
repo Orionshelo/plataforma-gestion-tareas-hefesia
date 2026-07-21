@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { Profile } from '@/lib/types/database'
+import { LayoutDashboard, FolderKanban, CheckSquare, Users } from 'lucide-react'
 
 interface SidebarProps {
   profile: Profile
@@ -12,13 +13,13 @@ export function Sidebar({ profile }: SidebarProps) {
   const pathname = usePathname()
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { href: '/projects', label: 'Proyectos', icon: '📁' },
-    { href: '/tasks', label: 'Mis Tareas', icon: '✅' },
+    { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { href: '/projects', label: 'Proyectos', icon: <FolderKanban size={20} /> },
+    { href: '/tasks', label: 'Mis Tareas', icon: <CheckSquare size={20} /> },
   ]
 
   const adminItems = [
-    { href: '/team', label: 'Equipo', icon: '👥' },
+    { href: '/team', label: 'Equipo', icon: <Users size={20} /> },
   ]
 
   const getInitials = (name: string) => {

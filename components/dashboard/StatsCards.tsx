@@ -1,5 +1,7 @@
 'use client'
 
+import { ClipboardList, Zap, CheckCircle2, Clock } from 'lucide-react'
+
 interface StatsCardsProps {
   pending: number
   inProgress: number
@@ -12,28 +14,28 @@ export function StatsCards({ pending, inProgress, completed, overdue }: StatsCar
     {
       label: 'Pendientes',
       value: pending,
-      icon: '📋',
+      icon: <ClipboardList size={24} />,
       bg: 'var(--warning-bg)',
       color: 'var(--warning)',
     },
     {
       label: 'En Progreso',
       value: inProgress,
-      icon: '⚡',
+      icon: <Zap size={24} />,
       bg: 'var(--info-bg)',
       color: 'var(--info)',
     },
     {
       label: 'Completadas',
       value: completed,
-      icon: '✅',
+      icon: <CheckCircle2 size={24} />,
       bg: 'var(--success-bg)',
       color: 'var(--success)',
     },
     {
       label: 'Vencidas',
       value: overdue,
-      icon: '⏰',
+      icon: <Clock size={24} />,
       bg: 'var(--danger-bg)',
       color: 'var(--danger)',
     },
