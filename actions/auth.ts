@@ -19,7 +19,7 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    return { error: 'Credenciales inválidas. Verifica tu email y contraseña.' }
+    return { error: `Error de Supabase: ${error.message}` }
   }
 
   redirect('/dashboard')
