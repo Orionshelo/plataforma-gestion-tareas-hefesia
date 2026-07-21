@@ -507,7 +507,8 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-primary);
+  background: var(--bg-primary) url('/background-1.jpg') no-repeat center center;
+  background-size: cover;
   position: relative;
   overflow: hidden;
 }
@@ -515,13 +516,8 @@ a:hover {
 .auth-layout::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-              radial-gradient(circle at 70% 60%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
-  animation: gradientShift 15s ease infinite;
+  inset: 0;
+  background: rgba(36, 35, 41, 0.7); /* Grafito Profundo semi-transparent overlay */
 }
 
 .auth-card {

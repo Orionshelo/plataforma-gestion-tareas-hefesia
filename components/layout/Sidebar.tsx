@@ -34,7 +34,9 @@ export function Sidebar({ profile }: SidebarProps) {
     <>
       <aside className="sidebar" id="sidebar">
         <div className="sidebar-header">
-          <div className="sidebar-brand">⚡ HefesIA Tasks</div>
+          <div className="sidebar-brand">
+            <img src="/Logo claro 1.png" alt="HefesIA Logo" style={{ maxHeight: '36px', width: 'auto' }} />
+          </div>
         </div>
 
         <nav className="sidebar-nav">

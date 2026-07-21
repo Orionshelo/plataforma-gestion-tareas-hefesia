@@ -10,7 +10,7 @@ export default function LoginPage() {
   return (
     <div className="auth-card">
       <div className="auth-logo">
-        <h1>HefesIA Tasks</h1>
+        <img src="/Logo claro 1.png" alt="HefesIA Logo" style={{ maxWidth: '240px', margin: '0 auto 10px' }} />
         <p>Gestión de proyectos y tareas</p>
       </div>
       <LoginForm />
