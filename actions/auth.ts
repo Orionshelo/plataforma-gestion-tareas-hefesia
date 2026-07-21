@@ -33,6 +33,7 @@ export async function login(formData: FormData) {
 
     redirect('/dashboard')
   } catch (err: any) {
+    if (err?.message === 'NEXT_REDIRECT') throw err;
     return { error: `Excepción: ${err?.message || String(err)}` }
   }
 }
