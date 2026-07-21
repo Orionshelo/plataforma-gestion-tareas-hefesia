@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { Profile } from '@/lib/types/database'
 import { LayoutDashboard, FolderKanban, CheckSquare, Users } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
 interface SidebarProps {
   profile: Profile
@@ -11,6 +13,10 @@ interface SidebarProps {
 
 export function Sidebar({ profile }: SidebarProps) {
   const pathname = usePathname()
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -36,7 +42,14 @@ export function Sidebar({ profile }: SidebarProps) {
       <aside className="sidebar" id="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <img src="/Logo claro 1.png" alt="HefesIA Logo" style={{ maxHeight: '36px', width: 'auto' }} />
+            {mounted && (
+              <img 
+                src={resolvedTheme === 'light' ? '/Logo oscuro 1.png' : '/Logo claro 1.png'} 
+                alt="HefesIA Logo" 
+                style={{ maxHeight: '36px', width: 'auto' }} 
+              />
+            )}
+            {!mounted && <div style={{ height: '36px' }} />}
           </div>
         </div>
 

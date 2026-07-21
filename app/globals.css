@@ -108,6 +108,7 @@
   --text-secondary: #404562;
   --text-tertiary: #6c757d;
   --text-inverse: #FFFFFF;
+  --text-heading: #404562; /* Azul Hefesia */
 
   --border-color: rgba(0, 0, 0, 0.08);
   --border-color-hover: rgba(0, 0, 0, 0.15);
@@ -139,6 +140,7 @@ html {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  color: var(--text-heading, inherit);
 }
 
 body {
