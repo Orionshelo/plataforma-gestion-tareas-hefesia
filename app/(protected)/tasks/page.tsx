@@ -23,14 +23,10 @@ export default async function TasksPage() {
   const isAdmin = profile?.role === 'admin'
 
   // Fetch tasks
-  let tasksQuery = supabase
+  const tasksQuery = supabase
     .from('tasks')
     .select('*, projects(name, color)')
     .order('due_date', { ascending: true, nullsFirst: false })
-
-  if (!isAdmin) {
-    tasksQuery = tasksQuery.eq('assigned_to', user.id)
-  }
 
   const { data: tasks } = await tasksQuery
 
@@ -52,6 +48,7 @@ export default async function TasksPage() {
       projects={projects || []}
       members={members || []}
       isAdmin={isAdmin}
+      currentUserId={user.id}
     />
   )
 }

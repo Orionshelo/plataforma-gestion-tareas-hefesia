@@ -12,19 +12,33 @@ interface TasksClientProps {
   projects: Pick<Project, 'id' | 'name' | 'color'>[]
   members: Pick<Profile, 'id' | 'full_name' | 'email'>[]
   isAdmin: boolean
+  currentUserId?: string
 }
 
-export function TasksClient({ tasks, projects, members, isAdmin }: TasksClientProps) {
+export function TasksClient({ tasks, projects, members, isAdmin, currentUserId }: TasksClientProps) {
   const [showForm, setShowForm] = useState(false)
+  const [editingTask, setEditingTask] = useState<TaskWithProject | null>(null)
+  const [viewMode, setViewMode] = useState<'mine' | 'team'>('mine')
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [loadingId, setLoadingId] = useState<string | null>(null)
 
   const filteredTasks = tasks.filter(t => {
+    if (viewMode === 'mine' && currentUserId && t.assigned_to !== currentUserId) return false
     if (statusFilter !== 'all' && t.status !== statusFilter) return false
     if (priorityFilter !== 'all' && t.priority !== priorityFilter) return false
     return true
   })
+
+  const handleEdit = (task: TaskWithProject) => {
+    setEditingTask(task)
+    setShowForm(true)
+  }
+
+  const handleCloseForm = () => {
+    setEditingTask(null)
+    setShowForm(false)
+  }
 
   const handleComplete = async (taskId: string) => {
     setLoadingId(taskId)
@@ -36,14 +50,29 @@ export function TasksClient({ tasks, projects, members, isAdmin }: TasksClientPr
     <>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Mis Tareas</h1>
-          <p className="page-subtitle">{tasks.length} tarea{tasks.length !== 1 ? 's' : ''} total{tasks.length !== 1 ? 'es' : ''}</p>
+          <h1 className="page-title">{viewMode === 'mine' ? 'Mis Tareas' : 'Tareas del Equipo'}</h1>
+          <p className="page-subtitle">{filteredTasks.length} tarea{filteredTasks.length !== 1 ? 's' : ''} encontrada{filteredTasks.length !== 1 ? 's' : ''}</p>
         </div>
         {isAdmin && projects.length > 0 && (
           <button className="btn btn-primary" onClick={() => setShowForm(true)}>
             + Nueva Tarea
           </button>
         )}
+      </div>
+
+      <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+        <button 
+          className={`btn ${viewMode === 'mine' ? 'btn-primary' : 'btn-ghost'}`} 
+          onClick={() => setViewMode('mine')}
+        >
+          Mis Tareas
+        </button>
+        <button 
+          className={`btn ${viewMode === 'team' ? 'btn-primary' : 'btn-ghost'}`} 
+          onClick={() => setViewMode('team')}
+        >
+          Tareas del Equipo
+        </button>
       </div>
 
       <div className="filters-bar">
@@ -115,6 +144,17 @@ export function TasksClient({ tasks, projects, members, isAdmin }: TasksClientPr
                 <span className={`badge badge-${task.status}`}>
                   {TASK_STATUS_LABELS[task.status]}
                 </span>
+                
+                {(isAdmin || task.created_by === currentUserId || task.assigned_to === currentUserId) && (
+                  <button 
+                    className="btn btn-ghost btn-icon" 
+                    onClick={() => handleEdit(task)}
+                    aria-label="Editar tarea"
+                    style={{ marginLeft: 'var(--space-sm)' }}
+                  >
+                    ✎
+                  </button>
+                )}
               </div>
             )
           })}
@@ -125,7 +165,8 @@ export function TasksClient({ tasks, projects, members, isAdmin }: TasksClientPr
         <TaskForm
           projects={projects}
           members={members}
-          onClose={() => setShowForm(false)}
+          task={editingTask || undefined}
+          onClose={handleCloseForm}
         />
       )}
     </>
