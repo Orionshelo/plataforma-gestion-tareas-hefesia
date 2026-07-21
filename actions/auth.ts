@@ -4,25 +4,37 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
 export async function login(formData: FormData) {
-  const supabase = await createClient()
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
+    if (!url || !anonKey) {
+      return { error: `Error de Configuración: Variables de entorno no encontradas en Vercel (URL: ${Boolean(url)}, KEY: ${Boolean(anonKey)})` }
+    }
 
-  if (!email || !password) {
-    return { error: 'Email y contraseña son requeridos.' }
+    const supabase = await createClient()
+
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    if (!email || !password) {
+      return { error: 'Email y contraseña son requeridos.' }
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      const details = error.message || (typeof error === 'object' ? JSON.stringify(error) : String(error))
+      return { error: `Supabase Error [${error.status || 'NoStatus'}]: ${details}` }
+    }
+
+    redirect('/dashboard')
+  } catch (err: any) {
+    return { error: `Excepción: ${err?.message || String(err)}` }
   }
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    return { error: `Error de Supabase: ${error.message}` }
-  }
-
-  redirect('/dashboard')
 }
 
 export async function logout() {
