@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { inviteUser, updateUserRole } from '@/actions/team'
+import { inviteUser, updateUserRole, updateUserFullName } from '@/actions/team'
 import { formatDateTime } from '@/lib/utils/dates'
 import type { Profile } from '@/lib/types/database'
+import { Edit2 } from 'lucide-react'
 
 interface TeamClientProps {
   members: Profile[]
@@ -16,6 +17,7 @@ export function TeamClient({ members, currentUserId }: TeamClientProps) {
   const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [updatingRole, setUpdatingRole] = useState<string | null>(null)
+  const [editingUser, setEditingUser] = useState<Profile | null>(null)
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '?'
@@ -47,6 +49,28 @@ export function TeamClient({ members, currentUserId }: TeamClientProps) {
       setError(result.error)
     }
     setUpdatingRole(null)
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!editingUser) return
+
+    setLoading(true)
+    setError(null)
+    setSuccess(null)
+
+    const formData = new FormData(e.currentTarget)
+    const fullName = formData.get('full_name') as string
+
+    const result = await updateUserFullName(editingUser.id, fullName)
+
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setSuccess('Perfil actualizado exitosamente.')
+      setEditingUser(null)
+    }
+    setLoading(false)
   }
 
   const avatarColors = [
@@ -100,6 +124,14 @@ export function TeamClient({ members, currentUserId }: TeamClientProps) {
                     <option value="member">Miembro</option>
                   </select>
                 )}
+                <button 
+                  className="btn btn-ghost btn-icon" 
+                  style={{ marginLeft: 'auto', padding: '4px' }}
+                  onClick={() => { setEditingUser(member); setError(null); setSuccess(null) }}
+                  title="Editar Perfil"
+                >
+                  <Edit2 size={16} />
+                </button>
               </div>
             </div>
           </div>
@@ -146,6 +178,55 @@ export function TeamClient({ members, currentUserId }: TeamClientProps) {
                     <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Creando...</>
                   ) : (
                     'Crear Usuario'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {editingUser && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setEditingUser(null) }}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title">Editar Perfil</h2>
+              <button className="modal-close" onClick={() => setEditingUser(null)}>×</button>
+            </div>
+
+            <form onSubmit={handleEditSubmit}>
+              <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                <label className="form-label" htmlFor="edit-name">Nombre completo *</label>
+                <input 
+                  id="edit-name" 
+                  name="full_name" 
+                  className="input" 
+                  defaultValue={editingUser.full_name || ''} 
+                  required 
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                <label className="form-label">Correo electrónico</label>
+                <input 
+                  className="input" 
+                  defaultValue={editingUser.email} 
+                  disabled 
+                  style={{ opacity: 0.7 }}
+                />
+                <small style={{ color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
+                  El correo electrónico no se puede modificar desde aquí.
+                </small>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setEditingUser(null)}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? (
+                    <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Guardando...</>
+                  ) : (
+                    'Guardar Cambios'
                   )}
                 </button>
               </div>

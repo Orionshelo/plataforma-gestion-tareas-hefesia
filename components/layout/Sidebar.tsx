@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { Profile } from '@/lib/types/database'
-import { LayoutDashboard, FolderKanban, CheckSquare, Users } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, CheckSquare, Users, User } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 
@@ -22,6 +22,7 @@ export function Sidebar({ profile }: SidebarProps) {
     { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { href: '/projects', label: 'Proyectos', icon: <FolderKanban size={20} /> },
     { href: '/tasks', label: 'Mis Tareas', icon: <CheckSquare size={20} /> },
+    { href: '/profile', label: 'Mi Perfil', icon: <User size={20} /> },
   ]
 
   const adminItems = [

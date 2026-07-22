@@ -90,3 +90,38 @@ export async function updateUserRole(userId: string, newRole: string) {
   revalidatePath('/team')
   return { success: true }
 }
+
+export async function updateUserFullName(userId: string, fullName: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autenticado.' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'admin' && user.id !== userId) {
+    return { error: 'No tienes permiso para editar este perfil.' }
+  }
+
+  const adminClient = createAdminClient()
+
+  const { error: profileError } = await adminClient
+    .from('profiles')
+    .update({ full_name: fullName })
+    .eq('id', userId)
+
+  if (profileError) {
+    return { error: 'Error al actualizar el perfil.' }
+  }
+
+  await adminClient.auth.admin.updateUserById(userId, {
+    user_metadata: { full_name: fullName }
+  })
+
+  revalidatePath('/team')
+  return { success: true }
+}
