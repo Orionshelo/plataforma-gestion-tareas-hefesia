@@ -91,7 +91,7 @@ export async function updateUserRole(userId: string, newRole: string) {
   return { success: true }
 }
 
-export async function updateUserFullName(userId: string, fullName: string) {
+export async function updateUserProfile(userId: string, data: { full_name?: string; avatar_url?: string }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -109,18 +109,22 @@ export async function updateUserFullName(userId: string, fullName: string) {
 
   const adminClient = createAdminClient()
 
+  // Update profile
   const { error: profileError } = await adminClient
     .from('profiles')
-    .update({ full_name: fullName })
+    .update(data)
     .eq('id', userId)
 
   if (profileError) {
     return { error: 'Error al actualizar el perfil.' }
   }
 
-  await adminClient.auth.admin.updateUserById(userId, {
-    user_metadata: { full_name: fullName }
-  })
+  // If full_name is updated, also update auth metadata
+  if (data.full_name) {
+    await adminClient.auth.admin.updateUserById(userId, {
+      user_metadata: { full_name: data.full_name }
+    })
+  }
 
   revalidatePath('/team')
   return { success: true }

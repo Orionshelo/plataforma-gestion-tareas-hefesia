@@ -88,9 +88,14 @@ export function Sidebar({ profile }: SidebarProps) {
           <div className="sidebar-user">
             <div
               className="avatar"
-              style={{ background: 'var(--accent-gradient)' }}
+              style={{ 
+                background: profile.avatar_url ? 'transparent' : 'var(--accent-gradient)',
+                backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
             >
-              {getInitials(profile.full_name || profile.email)}
+              {!profile.avatar_url && getInitials(profile.full_name || profile.email)}
             </div>
             <div className="sidebar-user-info">
               <div className="sidebar-user-name">

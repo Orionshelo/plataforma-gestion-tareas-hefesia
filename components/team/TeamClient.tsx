@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { inviteUser, updateUserRole, updateUserFullName } from '@/actions/team'
+import { inviteUser, updateUserRole, updateUserProfile } from '@/actions/team'
 import { formatDateTime } from '@/lib/utils/dates'
 import type { Profile } from '@/lib/types/database'
 import { Edit2 } from 'lucide-react'
@@ -62,7 +62,7 @@ export function TeamClient({ members, currentUserId }: TeamClientProps) {
     const formData = new FormData(e.currentTarget)
     const fullName = formData.get('full_name') as string
 
-    const result = await updateUserFullName(editingUser.id, fullName)
+    const result = await updateUserProfile(editingUser.id, { full_name: fullName })
 
     if (result?.error) {
       setError(result.error)
@@ -102,9 +102,14 @@ export function TeamClient({ members, currentUserId }: TeamClientProps) {
           <div key={member.id} className="team-card card" style={{ animationDelay: `${index * 60}ms` }}>
             <div
               className="avatar avatar-lg"
-              style={{ background: avatarColors[index % avatarColors.length] }}
+              style={{ 
+                background: member.avatar_url ? 'transparent' : avatarColors[index % avatarColors.length],
+                backgroundImage: member.avatar_url ? `url(${member.avatar_url})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
             >
-              {getInitials(member.full_name || member.email)}
+              {!member.avatar_url && getInitials(member.full_name || member.email)}
             </div>
             <div className="team-card-info">
               <div className="team-card-name">{member.full_name || 'Sin nombre'}</div>

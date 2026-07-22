@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { updateUserFullName } from '@/actions/team'
+import { updateUserProfile } from '@/actions/team'
 import type { Profile } from '@/lib/types/database'
-import { User } from 'lucide-react'
+import { User, Camera } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface ProfileClientProps {
   profile: Profile
@@ -13,6 +14,9 @@ export function ProfileClient({ profile }: ProfileClientProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(profile.avatar_url || null)
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -23,7 +27,30 @@ export function ProfileClient({ profile }: ProfileClientProps) {
     const formData = new FormData(e.currentTarget)
     const fullName = formData.get('full_name') as string
 
-    const result = await updateUserFullName(profile.id, fullName)
+    let avatar_url = profile.avatar_url
+
+    if (avatarFile) {
+      const fileExt = avatarFile.name.split('.').pop()
+      const fileName = `${profile.id}-${Math.random()}.${fileExt}`
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, avatarFile, { upsert: true })
+
+      if (uploadError) {
+        setError(`Error al subir la imagen: ${uploadError.message}`)
+        setLoading(false)
+        return
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName)
+
+      avatar_url = publicUrl
+    }
+
+    const result = await updateUserProfile(profile.id, { full_name: fullName, avatar_url })
 
     if (result?.error) {
       setError(result.error)
@@ -48,8 +75,51 @@ export function ProfileClient({ profile }: ProfileClientProps) {
 
       <div className="card" style={{ maxWidth: '600px', margin: '0 auto', marginTop: 'var(--space-xl)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>
-          <div className="avatar avatar-lg" style={{ background: 'var(--accent-gradient)', width: '80px', height: '80px', fontSize: '32px' }}>
-            {getInitials(profile.full_name || profile.email)}
+          <div style={{ position: 'relative' }}>
+            <div 
+              className="avatar avatar-lg" 
+              style={{ 
+                background: previewUrl ? 'transparent' : 'var(--accent-gradient)', 
+                width: '80px', 
+                height: '80px', 
+                fontSize: '32px',
+                backgroundImage: previewUrl ? `url(${previewUrl})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              {!previewUrl && getInitials(profile.full_name || profile.email)}
+            </div>
+            <label 
+              htmlFor="avatar-upload" 
+              className="btn btn-icon" 
+              style={{ 
+                position: 'absolute', 
+                bottom: '-5px', 
+                right: '-5px', 
+                background: 'var(--bg-card)',
+                boxShadow: 'var(--shadow-sm)',
+                borderRadius: '50%',
+                padding: '6px',
+                cursor: 'pointer'
+              }}
+              title="Cambiar foto"
+            >
+              <Camera size={16} />
+            </label>
+            <input 
+              id="avatar-upload" 
+              type="file" 
+              accept="image/*" 
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  const file = e.target.files[0]
+                  setAvatarFile(file)
+                  setPreviewUrl(URL.createObjectURL(file))
+                }
+              }}
+            />
           </div>
           <div>
             <h2 style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold' }}>{profile.full_name || 'Sin nombre'}</h2>
